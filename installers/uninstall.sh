@@ -4,36 +4,36 @@ set -e
 
 ######################################################################################
 #                                                                                    #
-# Project 'pterodactyl-installer'                                                    #
+# Proyecto 'pterodactyl-installer'                                                   #
 #                                                                                    #
-# Copyright (C) 2018 - 2026, Vilhelm Prytz, <vilhelm@prytznet.se>                    #
+# Derechos de autor (C) 2018 - 2026, Vilhelm Prytz, <vilhelm@prytznet.se>            #
 #                                                                                    #
-#   This program is free software: you can redistribute it and/or modify             #
-#   it under the terms of the GNU General Public License as published by             #
-#   the Free Software Foundation, either version 3 of the License, or                #
-#   (at your option) any later version.                                              #
+#   Este programa es software libre: puedes redistribuirlo y/o modificarlo           #
+#   bajo los terminos de la Licencia Publica General GNU publicada por               #
+#   la Free Software Foundation, ya sea la version 3 de la Licencia, o               #
+#   (a tu eleccion) cualquier version posterior.                                     #
 #                                                                                    #
-#   This program is distributed in the hope that it will be useful,                  #
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of                   #
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                    #
-#   GNU General Public License for more details.                                     #
+#   Este programa se distribuye con la esperanza de que sea util,                    #
+#   pero SIN NINGUNA GARANTIA; sin siquiera la garantia implicita de                 #
+#   COMERCIALIZACION o IDONEIDAD PARA UN PROPOSITO PARTICULAR. Consulta la           #
+#   Licencia Publica General GNU para mas detalles.                                  #
 #                                                                                    #
-#   You should have received a copy of the GNU General Public License                #
-#   along with this program.  If not, see <https://www.gnu.org/licenses/>.           #
+#   Deberias haber recibido una copia de la Licencia Publica General GNU             #
+#   junto con este programa. Si no, consulta <https://www.gnu.org/licenses/>.        #
 #                                                                                    #
 # https://github.com/pterodactyl-installer/pterodactyl-installer/blob/master/LICENSE #
 #                                                                                    #
-# This script is not associated with the official Pterodactyl Project.               #
+# Este script no esta asociado con el proyecto oficial de Pterodactyl.               #
 # https://github.com/pterodactyl-installer/pterodactyl-installer                     #
 #                                                                                    #
 ######################################################################################
 
-# Check if script is loaded, load if not or fail otherwise.
+# Verifica si el script esta cargado; si no, cargalo o falla.
 fn_exists() { declare -F "$1" >/dev/null; }
 if ! fn_exists lib_loaded; then
   # shellcheck source=lib/lib.sh
   source /tmp/lib.sh || source <(curl -sSL "$GITHUB_BASE_URL/$GITHUB_SOURCE"/lib/lib.sh)
-  ! fn_exists lib_loaded && echo "* ERROR: Could not load lib script" && exit 1
+  ! fn_exists lib_loaded && echo "* ERROR: No se pudo cargar el script de libreria" && exit 1
 fi
 
 # ------------------ Variables ----------------- #
@@ -44,26 +44,26 @@ RM_WINGS="${RM_WINGS:-true}"
 # ---------- Uninstallation functions ---------- #
 
 rm_panel_files() {
-  output "Removing panel files..."
+  output "Eliminando archivos del panel..."
   rm -rf /var/www/pterodactyl /usr/local/bin/composer
   [ "$OS" != "centos" ] && [ -L /etc/nginx/sites-enabled/pterodactyl.conf ] && unlink /etc/nginx/sites-enabled/pterodactyl.conf
   [ "$OS" != "centos" ] && [ -f /etc/nginx/sites-available/pterodactyl.conf ] && rm -f /etc/nginx/sites-available/pterodactyl.conf
   [ "$OS" != "centos" ] && [ ! -L /etc/nginx/sites-enabled/default ] && [ -f /etc/nginx/sites-available/default ] && ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
   [ "$OS" == "centos" ] && [ -f /etc/nginx/conf.d/pterodactyl.conf ] && rm -f /etc/nginx/conf.d/pterodactyl.conf
   systemctl restart nginx
-  success "Removed panel files."
+  success "Archivos del panel eliminados."
 }
 
 rm_docker_containers() {
-  output "Removing docker containers and images..."
+  output "Eliminando contenedores e imagenes de Docker..."
 
   docker system prune -a -f
 
-  success "Removed docker containers and images."
+  success "Contenedores e imagenes de Docker eliminados."
 }
 
 rm_wings_files() {
-  output "Removing wings files..."
+  output "Eliminando archivos de Wings..."
 
   systemctl disable --now wings
   [ -f /etc/systemd/system/wings.service ] && rm -rf /etc/systemd/system/wings.service
@@ -71,43 +71,44 @@ rm_wings_files() {
   [ -d /etc/pterodactyl ] && rm -rf /etc/pterodactyl
   [ -f /usr/local/bin/wings ] && rm -rf /usr/local/bin/wings
   [ -d /var/lib/pterodactyl ] && rm -rf /var/lib/pterodactyl
-  success "Removed wings files."
+  success "Archivos de Wings eliminados."
 }
 
 rm_services() {
-  output "Removing services..."
+  output "Eliminando servicios..."
   systemctl disable --now pteroq
   rm -rf /etc/systemd/system/pteroq.service
   case "$OS" in
   debian | ubuntu)
     systemctl disable --now redis-server
     ;;
-  centos)
+  centos | rocky | almalinux)
     systemctl disable --now redis
     systemctl disable --now php-fpm
     rm -rf /etc/php-fpm.d/www-pterodactyl.conf
     ;;
   esac
-  success "Removed services."
+  success "Servicios eliminados."
 }
 
 rm_cron() {
-  output "Removing cron jobs..."
-  crontab -l | grep -vF "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1" | crontab -
-  success "Removed cron jobs."
+  output "Eliminando cron jobs..."
+  local cron_line="* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1"
+  crontab -l 2>/dev/null | grep -vF "$cron_line" | crontab -
+  success "Cron jobs eliminados."
 }
 
 rm_database() {
-  output "Removing database..."
+  output "Eliminando base de datos..."
   valid_db=$(mariadb -u root -e "SELECT schema_name FROM information_schema.schemata;" 2>/dev/null | grep -v -E -- 'schema_name|information_schema|performance_schema|mysql')
   if [[ -z "$valid_db" ]]; then
-    warning "No valid databases found."
+    warning "No se encontraron bases de datos validas."
     return
   fi
 
-  warning "Be careful! This database will be deleted!"
+  warning "Cuidado. Esta base de datos sera eliminada."
   if [[ "$valid_db" == *"panel"* ]]; then
-    echo -n "* Database called panel has been detected. Is it the pterodactyl database? (y/N): "
+    echo -n "* Se detecto una base de datos llamada panel. Es la base de Pterodactyl? (y/N): "
     read -r is_panel
     if [[ "$is_panel" =~ [Yy] ]]; then
       DATABASE=panel
@@ -119,13 +120,13 @@ rm_database() {
   fi
 
   while [ -z "$DATABASE" ] || [[ "$valid_db" != *"$DATABASE"* ]]; do
-    echo -n "* Choose the panel database (to skip don't input anything): "
+    echo -n "* Elige la base del panel (para omitir, deja vacio): "
     read -r database_input
     if [[ -n "$database_input" ]]; then
       if [[ "$valid_db" == *"$database_input"* ]]; then
         DATABASE="$database_input"
       else
-        warning "Invalid database name. Try again."
+        warning "Nombre de base invalido. Intenta de nuevo."
       fi
     else
       break
@@ -133,22 +134,22 @@ rm_database() {
   done
 
   if [[ -n "$DATABASE" ]]; then
-    mariadb -u root -e "DROP DATABASE $DATABASE;" 2>/dev/null || warning "Failed to drop database $DATABASE."
+    mariadb -u root -e "DROP DATABASE $DATABASE;" 2>/dev/null || warning "No se pudo eliminar la base $DATABASE."
   else
-    output "No database selected, skipping removal."
+    output "No se selecciono base, se omite eliminacion."
   fi
 
-  # Exclude usernames User and root (Hope no one uses username User)
-  output "Removing database user..."
+  # Excluir usuarios User y root (esperamos que nadie use User)
+  output "Eliminando usuario de base de datos..."
   valid_users=$(mariadb -u root -e "SELECT user FROM mysql.user;" 2>/dev/null | grep -v -E -- 'user|root')
   if [[ -z "$valid_users" ]]; then
-    warning "No valid database users found."
+    warning "No se encontraron usuarios validos."
     return
   fi
 
-  warning "Be careful! This user will be deleted!"
+  warning "Cuidado. Este usuario sera eliminado."
   if [[ "$valid_users" == *"pterodactyl"* ]]; then
-    echo -n "* User called pterodactyl has been detected. Is it the pterodactyl user? (y/N): "
+    echo -n "* Se detecto un usuario pterodactyl. Es el usuario de Pterodactyl? (y/N): "
     read -r is_user
     if [[ "$is_user" =~ [Yy] ]]; then
       DB_USER=pterodactyl
@@ -160,13 +161,13 @@ rm_database() {
   fi
 
   while [ -z "$DB_USER" ] || [[ "$valid_users" != *"$DB_USER"* ]]; do
-    echo -n "* Choose the panel user (to skip don't input anything): "
+    echo -n "* Elige el usuario del panel (para omitir, deja vacio): "
     read -r user_input
     if [[ -n "$user_input" ]]; then
       if [[ "$valid_users" == *"$user_input"* ]]; then
         DB_USER=$user_input
       else
-        warning "Invalid username. Try again."
+        warning "Usuario invalido. Intenta de nuevo."
       fi
     else
       break
@@ -174,13 +175,13 @@ rm_database() {
   done
 
   if [[ -n "$DB_USER" ]]; then
-    mariadb -u root -e "DROP USER '$DB_USER'@'127.0.0.1';" 2>/dev/null || warning "Failed to drop user $DB_USER."
+    mariadb -u root -e "DROP USER '$DB_USER'@'127.0.0.1';" 2>/dev/null || warning "No se pudo eliminar el usuario $DB_USER."
   else
-    output "No user selected, skipping removal."
+    output "No se selecciono usuario, se omite eliminacion."
   fi
 
   mariadb -u root -e "FLUSH PRIVILEGES;" 2>/dev/null
-  success "Removed database and database user (if selected)."
+  success "Base de datos y usuario eliminados (si se selecciono)."
 }
 
 
@@ -197,6 +198,6 @@ perform_uninstall() {
   return 0
 }
 
-# ------------------ Uninstall ----------------- #
+# ------------------ Desinstalacion ------------ #
 
 perform_uninstall

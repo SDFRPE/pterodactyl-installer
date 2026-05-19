@@ -1,5 +1,5 @@
-# Contributing
+# Contribuir
 
-Feel free to contribute to the project by cloning the repository and sending a pull request.
+Si quieres contribuir al proyecto, clona el repositorio y envia un pull request.
 
-As always, make sure to state the changes in the title and the comment.
+Como siempre, asegura indicar los cambios en el titulo y el comentario.

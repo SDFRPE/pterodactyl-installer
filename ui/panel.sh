@@ -4,36 +4,36 @@ set -e
 
 ######################################################################################
 #                                                                                    #
-# Project 'pterodactyl-installer'                                                    #
+# Proyecto 'pterodactyl-installer'                                                   #
 #                                                                                    #
-# Copyright (C) 2018 - 2026, Vilhelm Prytz, <vilhelm@prytznet.se>                    #
+# Derechos de autor (C) 2018 - 2026, Vilhelm Prytz, <vilhelm@prytznet.se>            #
 #                                                                                    #
-#   This program is free software: you can redistribute it and/or modify             #
-#   it under the terms of the GNU General Public License as published by             #
-#   the Free Software Foundation, either version 3 of the License, or                #
-#   (at your option) any later version.                                              #
+#   Este programa es software libre: puedes redistribuirlo y/o modificarlo           #
+#   bajo los terminos de la Licencia Publica General GNU publicada por               #
+#   la Free Software Foundation, ya sea la version 3 de la Licencia, o               #
+#   (a tu eleccion) cualquier version posterior.                                     #
 #                                                                                    #
-#   This program is distributed in the hope that it will be useful,                  #
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of                   #
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                    #
-#   GNU General Public License for more details.                                     #
+#   Este programa se distribuye con la esperanza de que sea util,                    #
+#   pero SIN NINGUNA GARANTIA; sin siquiera la garantia implicita de                 #
+#   COMERCIALIZACION o IDONEIDAD PARA UN PROPOSITO PARTICULAR. Consulta la           #
+#   Licencia Publica General GNU para mas detalles.                                  #
 #                                                                                    #
-#   You should have received a copy of the GNU General Public License                #
-#   along with this program.  If not, see <https://www.gnu.org/licenses/>.           #
+#   Deberias haber recibido una copia de la Licencia Publica General GNU             #
+#   junto con este programa. Si no, consulta <https://www.gnu.org/licenses/>.        #
 #                                                                                    #
 # https://github.com/pterodactyl-installer/pterodactyl-installer/blob/master/LICENSE #
 #                                                                                    #
-# This script is not associated with the official Pterodactyl Project.               #
+# Este script no esta asociado con el proyecto oficial de Pterodactyl.               #
 # https://github.com/pterodactyl-installer/pterodactyl-installer                     #
 #                                                                                    #
 ######################################################################################
 
-# Check if script is loaded, load if not or fail otherwise.
+# Verifica si el script esta cargado; si no, cargalo o falla.
 fn_exists() { declare -F "$1" >/dev/null; }
 if ! fn_exists lib_loaded; then
   # shellcheck source=lib/lib.sh
   source /tmp/lib.sh || source <(curl -sSL "$GITHUB_BASE_URL/$GITHUB_SOURCE"/lib/lib.sh)
-  ! fn_exists lib_loaded && echo "* ERROR: Could not load lib script" && exit 1
+  ! fn_exists lib_loaded && echo "* ERROR: No se pudo cargar el script de libreria" && exit 1
 fi
 
 # ------------------ Variables ----------------- #
@@ -67,11 +67,11 @@ export CONFIGURE_FIREWALL=false
 # ------------ User input functions ------------ #
 
 ask_letsencrypt() {
-  if [ "$CONFIGURE_UFW" == false ] && [ "$CONFIGURE_FIREWALL_CMD" == false ]; then
-    warning "Let's Encrypt requires port 80/443 to be opened! You have opted out of the automatic firewall configuration; use this at your own risk (if port 80/443 is closed, the script will fail)!"
+  if [ "$CONFIGURE_FIREWALL" == false ]; then
+    warning "Let's Encrypt requiere que los puertos 80/443 esten abiertos. Has rechazado la configuracion automatica del firewall; usa esto bajo tu propio riesgo (si los puertos 80/443 estan cerrados, el script fallara)."
   fi
 
-  echo -e -n "* Do you want to automatically configure HTTPS using Let's Encrypt? (y/N): "
+  echo -e -n "* Quieres configurar HTTPS automaticamente con Let's Encrypt? (y/N): "
   read -r CONFIRM_SSL
 
   if [[ "$CONFIRM_SSL" =~ [Yy] ]]; then
@@ -81,10 +81,10 @@ ask_letsencrypt() {
 }
 
 ask_assume_ssl() {
-  output "Let's Encrypt is not going to be automatically configured by this script (user opted out)."
-  output "You can 'assume' Let's Encrypt, which means the script will download a nginx configuration that is configured to use a Let's Encrypt certificate but the script won't obtain the certificate for you."
-  output "If you assume SSL and do not obtain the certificate, your installation will not work."
-  echo -n "* Assume SSL or not? (y/N): "
+  output "Let's Encrypt no sera configurado automaticamente por este script (el usuario lo rechazo)."
+  output "Puedes 'asumir' Let's Encrypt, lo que significa que el script descargara una configuracion de nginx preparada para usar un certificado Let's Encrypt, pero no obtendra el certificado por ti."
+  output "Si asumes SSL y no obtienes el certificado, la instalacion no funcionara."
+  echo -n "* Asumir SSL o no? (y/N): "
   read -r ASSUME_SSL_INPUT
 
   [[ "$ASSUME_SSL_INPUT" =~ [Yy] ]] && ASSUME_SSL=true
@@ -95,19 +95,19 @@ check_FQDN_SSL() {
   if [[ $(invalid_ip "$FQDN") == 1 && $FQDN != 'localhost' ]]; then
     SSL_AVAILABLE=true
   else
-    warning "* Let's Encrypt will not be available for IP addresses."
-    output "To use Let's Encrypt, you must use a valid domain name."
+    warning "* Let's Encrypt no estara disponible para direcciones IP."
+    output "Para usar Let's Encrypt, debes usar un dominio valido."
   fi
 }
 
 main() {
-  # check if we can detect an already existing installation
+  # verificar si ya existe una instalacion
   if [ -d "/var/www/pterodactyl" ]; then
-    warning "The script has detected that you already have Pterodactyl panel on your system! You cannot run the script multiple times, it will fail!"
-    echo -e -n "* Are you sure you want to proceed? (y/N): "
+    warning "El script detecto que ya tienes el panel de Pterodactyl en el sistema. No puedes ejecutar el script varias veces, fallara."
+    echo -e -n "* Estas seguro de continuar? (y/N): "
     read -r CONFIRM_PROCEED
     if [[ ! "$CONFIRM_PROCEED" =~ [Yy] ]]; then
-      error "Installation aborted!"
+      error "Instalacion cancelada."
       exit 1
     fi
   fi
@@ -117,122 +117,129 @@ main() {
   check_os_x86_64
 
   # set database credentials
-  output "Database configuration."
+  output "Configuracion de base de datos."
   output ""
-  output "This will be the credentials used for communication between the MySQL"
-  output "database and the panel. You do not need to create the database"
-  output "before running this script, the script will do that for you."
+  output "Estas credenciales se usaran para la comunicacion entre la base de datos MySQL"
+  output "y el panel. No necesitas crear la base de datos antes de ejecutar este script,"
+  output "el script lo hara por ti."
   output ""
 
   MYSQL_DB="-"
   while [[ "$MYSQL_DB" == *"-"* ]]; do
-    required_input MYSQL_DB "Database name (panel): " "" "panel"
-    [[ "$MYSQL_DB" == *"-"* ]] && error "Database name cannot contain hyphens"
+    required_input MYSQL_DB "Nombre de la base de datos (panel): " "" "panel"
+    [[ "$MYSQL_DB" == *"-"* ]] && error "El nombre de la base de datos no puede contener guiones"
   done
 
   MYSQL_USER="-"
   while [[ "$MYSQL_USER" == *"-"* ]]; do
-    required_input MYSQL_USER "Database username (pterodactyl): " "" "pterodactyl"
-    [[ "$MYSQL_USER" == *"-"* ]] && error "Database user cannot contain hyphens"
+    required_input MYSQL_USER "Usuario de base de datos (pterodactyl): " "" "pterodactyl"
+    [[ "$MYSQL_USER" == *"-"* ]] && error "El usuario de base de datos no puede contener guiones"
   done
 
   # MySQL password input
   rand_pw=$(gen_passwd 64)
-  password_input MYSQL_PASSWORD "Password (press enter to use randomly generated password): " "MySQL password cannot be empty" "$rand_pw"
+  password_input MYSQL_PASSWORD "Contrasena (enter para usar una contrasena aleatoria): " "La contrasena de MySQL no puede estar vacia" "$rand_pw"
 
   readarray -t valid_timezones <<<"$(curl -s "$GITHUB_URL"/configs/valid_timezones.txt)"
-  output "List of valid timezones here $(hyperlink "https://www.php.net/manual/en/timezones.php")"
+  if [ ${#valid_timezones[@]} -eq 0 ]; then
+    warning "No se pudo obtener la lista de zonas horarias; se aceptara cualquier valor no vacio."
+  fi
+  output "Lista de zonas horarias validas: $(hyperlink "https://www.php.net/manual/en/timezones.php")"
 
   while [ -z "$timezone" ]; do
-    echo -n "* Select timezone [Europe/Stockholm]: "
+    echo -n "* Selecciona zona horaria [Europe/Stockholm]: "
     read -r timezone_input
 
-    array_contains_element "$timezone_input" "${valid_timezones[@]}" && timezone="$timezone_input"
+    if [ ${#valid_timezones[@]} -eq 0 ]; then
+      [ -n "$timezone_input" ] && timezone="$timezone_input"
+    else
+      array_contains_element "$timezone_input" "${valid_timezones[@]}" && timezone="$timezone_input"
+    fi
     [ -z "$timezone_input" ] && timezone="Europe/Stockholm" # because köttbullar!
   done
 
-  email_input email "Provide the email address that will be used to configure Let's Encrypt and Pterodactyl: " "Email cannot be empty or invalid"
+  email_input email "Correo para configurar Let's Encrypt y Pterodactyl: " "El correo no puede estar vacio o invalido"
 
   # Initial admin account
-  email_input user_email "Email address for the initial admin account: " "Email cannot be empty or invalid"
-  required_input user_username "Username for the initial admin account: " "Username cannot be empty"
-  required_input user_firstname "First name for the initial admin account: " "Name cannot be empty"
-  required_input user_lastname "Last name for the initial admin account: " "Name cannot be empty"
-  password_input user_password "Password for the initial admin account: " "Password cannot be empty"
+  email_input user_email "Correo del usuario admin inicial: " "El correo no puede estar vacio o invalido"
+  required_input user_username "Usuario del admin inicial: " "El usuario no puede estar vacio"
+  required_input user_firstname "Nombre del admin inicial: " "El nombre no puede estar vacio"
+  required_input user_lastname "Apellido del admin inicial: " "El apellido no puede estar vacio"
+  password_input user_password "Contrasena del admin inicial: " "La contrasena no puede estar vacia"
 
   print_brake 72
 
   # set FQDN
   while [ -z "$FQDN" ]; do
-    echo -n "* Set the FQDN of this panel (panel.example.com): "
+    echo -n "* Define el FQDN de este panel (panel.example.com): "
     read -r FQDN
-    [ -z "$FQDN" ] && error "FQDN cannot be empty"
+    [ -z "$FQDN" ] && error "El FQDN no puede estar vacio"
   done
 
-  # Check if SSL is available
+  # Verificar si SSL esta disponible
   check_FQDN_SSL
 
   # Ask if firewall is needed
   ask_firewall CONFIGURE_FIREWALL
 
-  # Only ask about SSL if it is available
+  # Solo preguntar por SSL si esta disponible
   if [ "$SSL_AVAILABLE" == true ]; then
     # Ask if letsencrypt is needed
     ask_letsencrypt
-    # If it's already true, this should be a no-brainer
+    # Si ya es true, esto deberia ser directo
     [ "$CONFIGURE_LETSENCRYPT" == false ] && ask_assume_ssl
   fi
 
-  # verify FQDN if user has selected to assume SSL or configure Let's Encrypt
+  # verificar FQDN si el usuario eligio asumir SSL o configurar Let's Encrypt
   [ "$CONFIGURE_LETSENCRYPT" == true ] || [ "$ASSUME_SSL" == true ] && bash <(curl -s "$GITHUB_URL"/lib/verify-fqdn.sh) "$FQDN"
 
   # summary
   summary
 
-  # confirm installation
-  echo -e -n "\n* Initial configuration completed. Continue with installation? (y/N): "
+  # confirmar instalacion
+  echo -e -n "\n* Configuracion inicial completada. Continuar con la instalacion? (y/N): "
   read -r CONFIRM
   if [[ "$CONFIRM" =~ [Yy] ]]; then
     run_installer "panel"
   else
-    error "Installation aborted."
+    error "Instalacion cancelada."
     exit 1
   fi
 }
 
 summary() {
   print_brake 62
-  output "Pterodactyl panel $PTERODACTYL_PANEL_VERSION with nginx on $OS"
-  output "Database name: $MYSQL_DB"
-  output "Database user: $MYSQL_USER"
-  output "Database password: (censored)"
-  output "Timezone: $timezone"
-  output "Email: $email"
-  output "User email: $user_email"
-  output "Username: $user_username"
-  output "First name: $user_firstname"
-  output "Last name: $user_lastname"
-  output "User password: (censored)"
+  output "Panel Pterodactyl $PTERODACTYL_PANEL_VERSION con nginx en $OS"
+  output "Nombre de base de datos: $MYSQL_DB"
+  output "Usuario de base de datos: $MYSQL_USER"
+  output "Contrasena de base de datos: (oculta)"
+  output "Zona horaria: $timezone"
+  output "Correo: $email"
+  output "Correo del usuario: $user_email"
+  output "Usuario: $user_username"
+  output "Nombre: $user_firstname"
+  output "Apellido: $user_lastname"
+  output "Contrasena del usuario: (oculta)"
   output "Hostname/FQDN: $FQDN"
-  output "Configure Firewall? $CONFIGURE_FIREWALL"
-  output "Configure Let's Encrypt? $CONFIGURE_LETSENCRYPT"
-  output "Assume SSL? $ASSUME_SSL"
+  output "Configurar Firewall? $CONFIGURE_FIREWALL"
+  output "Configurar Let's Encrypt? $CONFIGURE_LETSENCRYPT"
+  output "Asumir SSL? $ASSUME_SSL"
   print_brake 62
 }
 
 goodbye() {
   print_brake 62
-  output "Panel installation completed"
+  output "Instalacion del panel completada"
   output ""
 
-  [ "$CONFIGURE_LETSENCRYPT" == true ] && output "Your panel should be accessible from $(hyperlink "$FQDN")"
-  [ "$ASSUME_SSL" == true ] && [ "$CONFIGURE_LETSENCRYPT" == false ] && output "You have opted in to use SSL, but not via Let's Encrypt automatically. Your panel will not work until SSL has been configured."
-  [ "$ASSUME_SSL" == false ] && [ "$CONFIGURE_LETSENCRYPT" == false ] && output "Your panel should be accessible from $(hyperlink "$FQDN")"
+  [ "$CONFIGURE_LETSENCRYPT" == true ] && output "Tu panel deberia estar accesible en $(hyperlink "$FQDN")"
+  [ "$ASSUME_SSL" == true ] && [ "$CONFIGURE_LETSENCRYPT" == false ] && output "Elegiste usar SSL, pero no via Let's Encrypt automaticamente. El panel no funcionara hasta que SSL este configurado."
+  [ "$ASSUME_SSL" == false ] && [ "$CONFIGURE_LETSENCRYPT" == false ] && output "Tu panel deberia estar accesible en $(hyperlink "$FQDN")"
 
   output ""
-  output "Installation is using nginx on $OS"
-  output "Thank you for using this script."
-  [ "$CONFIGURE_FIREWALL" == false ] && echo -e "* ${COLOR_RED}Note${COLOR_NC}: If you haven't configured the firewall: 80/443 (HTTP/HTTPS) is required to be open!"
+  output "La instalacion usa nginx en $OS"
+  output "Gracias por usar este script."
+  [ "$CONFIGURE_FIREWALL" == false ] && echo -e "* ${COLOR_RED}Nota${COLOR_NC}: Si no configuraste el firewall, los puertos 80/443 (HTTP/HTTPS) deben estar abiertos."
   print_brake 62
 }
 

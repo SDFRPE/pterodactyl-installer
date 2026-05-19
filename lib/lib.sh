@@ -4,26 +4,26 @@ set -e
 
 ######################################################################################
 #                                                                                    #
-# Project 'pterodactyl-installer'                                                    #
+# Proyecto 'pterodactyl-installer'                                                   #
 #                                                                                    #
-# Copyright (C) 2018 - 2026, Vilhelm Prytz, <vilhelm@prytznet.se>                    #
+# Derechos de autor (C) 2018 - 2026, Vilhelm Prytz, <vilhelm@prytznet.se>            #
 #                                                                                    #
-#   This program is free software: you can redistribute it and/or modify             #
-#   it under the terms of the GNU General Public License as published by             #
-#   the Free Software Foundation, either version 3 of the License, or                #
-#   (at your option) any later version.                                              #
+#   Este programa es software libre: puedes redistribuirlo y/o modificarlo           #
+#   bajo los terminos de la Licencia Publica General GNU publicada por               #
+#   la Free Software Foundation, ya sea la version 3 de la Licencia, o               #
+#   (a tu eleccion) cualquier version posterior.                                     #
 #                                                                                    #
-#   This program is distributed in the hope that it will be useful,                  #
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of                   #
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                    #
-#   GNU General Public License for more details.                                     #
+#   Este programa se distribuye con la esperanza de que sea util,                    #
+#   pero SIN NINGUNA GARANTIA; sin siquiera la garantia implicita de                 #
+#   COMERCIALIZACION o IDONEIDAD PARA UN PROPOSITO PARTICULAR. Consulta la           #
+#   Licencia Publica General GNU para mas detalles.                                  #
 #                                                                                    #
-#   You should have received a copy of the GNU General Public License                #
-#   along with this program.  If not, see <https://www.gnu.org/licenses/>.           #
+#   Deberias haber recibido una copia de la Licencia Publica General GNU             #
+#   junto con este programa. Si no, consulta <https://www.gnu.org/licenses/>.        #
 #                                                                                    #
 # https://github.com/pterodactyl-installer/pterodactyl-installer/blob/master/LICENSE #
 #                                                                                    #
-# This script is not associated with the official Pterodactyl Project.               #
+# Este script no esta asociado con el proyecto oficial de Pterodactyl.               #
 # https://github.com/pterodactyl-installer/pterodactyl-installer                     #
 #                                                                                    #
 ######################################################################################
@@ -38,7 +38,7 @@ export SCRIPT_RELEASE=${SCRIPT_RELEASE:-canary}
 export PTERODACTYL_PANEL_VERSION=""
 export PTERODACTYL_WINGS_VERSION=""
 
-# Path (export everything that is possible, doesn't matter that it exists already)
+# Ruta (exportar todo lo posible, no importa si ya existe)
 export PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 
 # OS
@@ -81,7 +81,7 @@ output() {
 
 success() {
   echo ""
-  output "${COLOR_GREEN}SUCCESS${COLOR_NC}: $1"
+  output "${COLOR_GREEN}EXITO${COLOR_NC}: $1"
   echo ""
 }
 
@@ -93,7 +93,7 @@ error() {
 
 warning() {
   echo ""
-  output "${COLOR_YELLOW}WARNING${COLOR_NC}: $1"
+  output "${COLOR_YELLOW}ADVERTENCIA${COLOR_NC}: $1"
   echo ""
 }
 
@@ -122,18 +122,18 @@ welcome() {
   get_latest_versions
 
   print_brake 70
-  output "Pterodactyl panel installation script @ $SCRIPT_RELEASE"
+  output "Script de instalacion de Pterodactyl @ $SCRIPT_RELEASE"
   output ""
   output "Copyright (C) 2018 - 2026, Vilhelm Prytz, <vilhelm@prytznet.se>"
   output "https://github.com/pterodactyl-installer/pterodactyl-installer"
   output ""
-  output "This script is not associated with the official Pterodactyl Project."
+  output "Este script no esta asociado con el proyecto oficial de Pterodactyl."
   output ""
-  output "Running $OS version $OS_VER."
+  output "Ejecutando $OS version $OS_VER."
   if [ "$1" == "panel" ]; then
-    output "Latest pterodactyl/panel is $PTERODACTYL_PANEL_VERSION"
+    output "Ultima version pterodactyl/panel: $PTERODACTYL_PANEL_VERSION"
   elif [ "$1" == "wings" ]; then
-    output "Latest pterodactyl/wings is $PTERODACTYL_WINGS_VERSION"
+    output "Ultima version pterodactyl/wings: $PTERODACTYL_WINGS_VERSION"
   fi
   print_brake 70
 }
@@ -147,7 +147,7 @@ get_latest_release() {
 }
 
 get_latest_versions() {
-  output "Retrieving release information..."
+  output "Obteniendo informacion de versiones..."
   PTERODACTYL_PANEL_VERSION=$(get_latest_release "pterodactyl/panel")
   PTERODACTYL_WINGS_VERSION=$(get_latest_release "pterodactyl/wings")
 }
@@ -200,12 +200,12 @@ create_db_user() {
   local db_user_password="$2"
   local db_host="${3:-127.0.0.1}"
 
-  output "Creating database user $db_user_name..."
+  output "Creando usuario de base de datos $db_user_name..."
 
   mariadb -u root -e "CREATE USER '$db_user_name'@'$db_host' IDENTIFIED BY '$db_user_password';"
   mariadb -u root -e "FLUSH PRIVILEGES;"
 
-  output "Database user $db_user_name created"
+  output "Usuario de base de datos $db_user_name creado"
 }
 
 grant_all_privileges() {
@@ -213,12 +213,12 @@ grant_all_privileges() {
   local db_user_name="$2"
   local db_host="${3:-127.0.0.1}"
 
-  output "Granting all privileges on $db_name to $db_user_name..."
+  output "Otorgando privilegios en $db_name a $db_user_name..."
 
   mariadb -u root -e "GRANT ALL PRIVILEGES ON $db_name.* TO '$db_user_name'@'$db_host' WITH GRANT OPTION;"
   mariadb -u root -e "FLUSH PRIVILEGES;"
 
-  output "Privileges granted"
+  output "Privilegios otorgados"
 
 }
 
@@ -227,12 +227,12 @@ create_db() {
   local db_user_name="$2"
   local db_host="${3:-127.0.0.1}"
 
-  output "Creating database $db_name..."
+  output "Creando base de datos $db_name..."
 
   mariadb -u root -e "CREATE DATABASE $db_name;"
   grant_all_privileges "$db_name" "$db_user_name" "$db_host"
 
-  output "Database $db_name created"
+  output "Base de datos $db_name creada"
 }
 
 # --------------- Package Manager -------------- #
@@ -244,24 +244,24 @@ update_repos() {
 
   case "$OS" in
     ubuntu | debian)
-      output "Updating package repositories..."
+      output "Actualizando repositorios de paquetes..."
       if ! apt-get update -y $args; then
-        error "Failed to update repositories."
+        error "No se pudieron actualizar los repositorios."
         return 1
       fi
       ;;
-    centos | almalinux | rockylinux)
+    centos | rocky | almalinux)
       # Skip since these distros auto-refresh metadata
-      output "Skipping repository update (handled automatically on $OS)."
+      output "Omitiendo actualizacion de repositorios (gestionado automaticamente en $OS)."
       ;;
     *)
-      warning "Unsupported OS: $OS — skipping repository update."
+      warning "Sistema no compatible: $OS. Se omite actualizacion de repositorios."
       ;;
   esac
 }
 
 
-# First argument list of packages to install, second argument for quite mode
+# Primer argumento: lista de paquetes a instalar; segundo argumento: modo silencioso
 install_packages() {
   local args=""
   if [[ $2 == true ]]; then
@@ -329,13 +329,13 @@ password_input() {
       [[ -z $char ]] && {
         printf '\n'
         break
-      }                               # ENTER pressed; output \n and break.
+      }                               # ENTER presionado; imprime \n y termina.
       if [[ $char == $'\x7f' ]]; then # backspace was pressed
-        # Only if variable is not empty
+        # Solo si la variable no esta vacia
         if [ -n "$result" ]; then
           # Remove last char from output variable.
           [[ -n $result ]] && result=${result%?}
-          # Erase '*' to the left.
+          # Borra '*' a la izquierda.
           printf '\b \b'
         fi
       else
@@ -359,7 +359,7 @@ ask_firewall() {
 
   case "$OS" in
   ubuntu | debian)
-    echo -e -n "* Do you want to automatically configure UFW (firewall)? (y/N): "
+    echo -e -n "* Quieres configurar automaticamente UFW (firewall)? (y/N): "
     read -r CONFIRM_UFW
 
     if [[ "$CONFIRM_UFW" =~ [Yy] ]]; then
@@ -367,7 +367,7 @@ ask_firewall() {
     fi
     ;;
   rocky | almalinux)
-    echo -e -n "* Do you want to automatically configure firewall-cmd (firewall)? (y/N): "
+    echo -e -n "* Quieres configurar automaticamente firewall-cmd (firewall)? (y/N): "
     read -r CONFIRM_FIREWALL_CMD
 
     if [[ "$CONFIRM_FIREWALL_CMD" =~ [Yy] ]]; then
@@ -381,7 +381,7 @@ install_firewall() {
   case "$OS" in
   ubuntu | debian)
     output ""
-    output "Installing Uncomplicated Firewall (UFW)"
+    output "Instalando Uncomplicated Firewall (UFW)"
 
     if ! [ -x "$(command -v ufw)" ]; then
       update_repos true
@@ -390,13 +390,13 @@ install_firewall() {
 
     ufw --force enable
 
-    success "Enabled Uncomplicated Firewall (UFW)"
+    success "UFW habilitado"
 
     ;;
   rocky | almalinux)
 
     output ""
-    output "Installing FirewallD"+
+    output "Instalando FirewallD"
 
     if ! [ -x "$(command -v firewall-cmd)" ]; then
       install_packages "firewalld" true
@@ -404,7 +404,7 @@ install_firewall() {
 
     systemctl --now enable firewalld >/dev/null
 
-    success "Enabled FirewallD"
+    success "FirewallD habilitado"
 
     ;;
   esac
@@ -432,14 +432,14 @@ firewall_allow_ports() {
 # panel x86_64 check
 check_os_x86_64() {
   if [ "${ARCH}" != "amd64" ]; then
-    warning "Detected CPU architecture $CPU_ARCHITECTURE"
-    warning "Using any other architecture than 64 bit (x86_64) will cause problems."
+    warning "Arquitectura detectada: $CPU_ARCHITECTURE"
+    warning "Usar una arquitectura diferente a 64 bit (x86_64) puede causar problemas."
 
-    echo -e -n "* Are you sure you want to proceed? (y/N):"
+    echo -e -n "* Estas seguro de continuar? (y/N):"
     read -r choice
 
     if [[ ! "$choice" =~ [Yy] ]]; then
-      error "Installation aborted!"
+      error "Instalacion cancelada."
       exit 1
     fi
   fi
@@ -447,7 +447,7 @@ check_os_x86_64() {
 
 # wings virtualization check
 check_virt() {
-  output "Installing virt-what..."
+  output "Instalando virt-what..."
 
   update_repos true
   install_packages "virt-what" true
@@ -459,36 +459,36 @@ check_virt() {
 
   case "$virt_serv" in
   *openvz* | *lxc*)
-    warning "Unsupported type of virtualization detected. Please consult with your hosting provider whether your server can run Docker or not. Proceed at your own risk."
-    echo -e -n "* Are you sure you want to proceed? (y/N): "
+    warning "Se detecto un tipo de virtualizacion no compatible. Consulta con tu proveedor si el servidor puede ejecutar Docker. Continúa bajo tu propio riesgo."
+    echo -e -n "* Estas seguro de continuar? (y/N): "
     read -r CONFIRM_PROCEED
     if [[ ! "$CONFIRM_PROCEED" =~ [Yy] ]]; then
-      error "Installation aborted!"
+      error "Instalacion cancelada."
       exit 1
     fi
     ;;
   *)
-    [ "$virt_serv" != "" ] && warning "Virtualization: $virt_serv detected."
+    [ "$virt_serv" != "" ] && warning "Virtualizacion detectada: $virt_serv."
     ;;
   esac
 
   if uname -r | grep -q "xxxx"; then
-    error "Unsupported kernel detected."
+    error "Kernel no compatible detectado."
     exit 1
   fi
 
-  success "System is compatible with docker"
+  success "El sistema es compatible con Docker"
 }
 
 # Exit with error status code if user is not root
 if [[ $EUID -ne 0 ]]; then
-  error "This script must be executed with root privileges."
+  error "Este script debe ejecutarse con privilegios de root."
   exit 1
 fi
 
 # Detect OS
 if [ -f /etc/os-release ]; then
-  # freedesktop.org and systemd
+  # freedesktop.org y systemd
   . /etc/os-release
   OS=$(echo "$ID" | awk '{print tolower($0)}')
   OS_VER=$VERSION_ID
@@ -531,7 +531,7 @@ arm64 | aarch64)
   ARCH=arm64
   ;;
 *)
-  error "Only x86_64 and arm64 are supported!"
+  error "Solo se soportan x86_64 y arm64."
   exit 1
   ;;
 esac
@@ -558,9 +558,9 @@ rocky | almalinux)
   ;;
 esac
 
-# exit if not supported
+# salir si no es compatible
 if [ "$SUPPORTED" == false ]; then
-  output "$OS $OS_VER is not supported"
-  error "Unsupported OS"
+  output "$OS $OS_VER no es compatible"
+  error "Sistema no compatible"
   exit 1
 fi

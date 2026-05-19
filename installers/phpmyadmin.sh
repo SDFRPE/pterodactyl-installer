@@ -4,36 +4,36 @@ set -e
 
 ######################################################################################
 #                                                                                    #
-# Project 'pterodactyl-installer'                                                    #
+# Proyecto 'pterodactyl-installer'                                                   #
 #                                                                                    #
-# Copyright (C) 2018 - 2026, Vilhelm Prytz, <vilhelm@prytznet.se>                    #
+# Derechos de autor (C) 2018 - 2026, Vilhelm Prytz, <vilhelm@prytznet.se>            #
 #                                                                                    #
-#   This program is free software: you can redistribute it and/or modify             #
-#   it under the terms of the GNU General Public License as published by             #
-#   the Free Software Foundation, either version 3 of the License, or                #
-#   (at your option) any later version.                                              #
+#   Este programa es software libre: puedes redistribuirlo y/o modificarlo           #
+#   bajo los terminos de la Licencia Publica General GNU publicada por               #
+#   la Free Software Foundation, ya sea la version 3 de la Licencia, o               #
+#   (a tu eleccion) cualquier version posterior.                                     #
 #                                                                                    #
-#   This program is distributed in the hope that it will be useful,                  #
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of                   #
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                    #
-#   GNU General Public License for more details.                                     #
+#   Este programa se distribuye con la esperanza de que sea util,                    #
+#   pero SIN NINGUNA GARANTIA; sin siquiera la garantia implicita de                 #
+#   COMERCIALIZACION o IDONEIDAD PARA UN PROPOSITO PARTICULAR. Consulta la           #
+#   Licencia Publica General GNU para mas detalles.                                  #
 #                                                                                    #
-#   You should have received a copy of the GNU General Public License                #
-#   along with this program.  If not, see <https://www.gnu.org/licenses/>.           #
+#   Deberias haber recibido una copia de la Licencia Publica General GNU             #
+#   junto con este programa. Si no, consulta <https://www.gnu.org/licenses/>.        #
 #                                                                                    #
 # https://github.com/pterodactyl-installer/pterodactyl-installer/blob/master/LICENSE #
 #                                                                                    #
-# This script is not associated with the official Pterodactyl Project.               #
+# Este script no esta asociado con el proyecto oficial de Pterodactyl.               #
 # https://github.com/pterodactyl-installer/pterodactyl-installer                     #
 #                                                                                    #
 ######################################################################################
 
-# Check if script is loaded, load if not or fail otherwise.
+# Verifica si el script esta cargado; si no, cargalo o falla.
 fn_exists() { declare -F "$1" >/dev/null; }
 if ! fn_exists lib_loaded; then
   # shellcheck source=lib/lib.sh
   source /tmp/lib.sh || source <(curl -sSL "$GITHUB_BASE_URL/$GITHUB_SOURCE"/lib/lib.sh)
-  ! fn_exists lib_loaded && echo "* ERROR: Could not load lib script" && exit 1
+  ! fn_exists lib_loaded && echo "* ERROR: No se pudo cargar el script de libreria" && exit 1
 fi
 
 # When #280 is merged

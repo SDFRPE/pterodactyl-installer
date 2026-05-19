@@ -4,36 +4,36 @@ set -e
 
 ######################################################################################
 #                                                                                    #
-# Project 'pterodactyl-installer'                                                    #
+# Proyecto 'pterodactyl-installer'                                                   #
 #                                                                                    #
-# Copyright (C) 2018 - 2026, Vilhelm Prytz, <vilhelm@prytznet.se>                    #
+# Derechos de autor (C) 2018 - 2026, Vilhelm Prytz, <vilhelm@prytznet.se>            #
 #                                                                                    #
-#   This program is free software: you can redistribute it and/or modify             #
-#   it under the terms of the GNU General Public License as published by             #
-#   the Free Software Foundation, either version 3 of the License, or                #
-#   (at your option) any later version.                                              #
+#   Este programa es software libre: puedes redistribuirlo y/o modificarlo           #
+#   bajo los terminos de la Licencia Publica General GNU publicada por               #
+#   la Free Software Foundation, ya sea la version 3 de la Licencia, o               #
+#   (a tu eleccion) cualquier version posterior.                                     #
 #                                                                                    #
-#   This program is distributed in the hope that it will be useful,                  #
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of                   #
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                    #
-#   GNU General Public License for more details.                                     #
+#   Este programa se distribuye con la esperanza de que sea util,                    #
+#   pero SIN NINGUNA GARANTIA; sin siquiera la garantia implicita de                 #
+#   COMERCIALIZACION o IDONEIDAD PARA UN PROPOSITO PARTICULAR. Consulta la           #
+#   Licencia Publica General GNU para mas detalles.                                  #
 #                                                                                    #
-#   You should have received a copy of the GNU General Public License                #
-#   along with this program.  If not, see <https://www.gnu.org/licenses/>.           #
+#   Deberias haber recibido una copia de la Licencia Publica General GNU             #
+#   junto con este programa. Si no, consulta <https://www.gnu.org/licenses/>.        #
 #                                                                                    #
 # https://github.com/pterodactyl-installer/pterodactyl-installer/blob/master/LICENSE #
 #                                                                                    #
-# This script is not associated with the official Pterodactyl Project.               #
+# Este script no esta asociado con el proyecto oficial de Pterodactyl.               #
 # https://github.com/pterodactyl-installer/pterodactyl-installer                     #
 #                                                                                    #
 ######################################################################################
 
-# Check if script is loaded, load if not or fail otherwise.
+# Verifica si el script esta cargado; si no, cargalo o falla.
 fn_exists() { declare -F "$1" >/dev/null; }
 if ! fn_exists lib_loaded; then
   # shellcheck source=lib/lib.sh
   source /tmp/lib.sh || source <(curl -sSL "$GITHUB_BASE_URL/$GITHUB_SOURCE"/lib/lib.sh)
-  ! fn_exists lib_loaded && echo "* ERROR: Could not load lib script" && exit 1
+  ! fn_exists lib_loaded && echo "* ERROR: No se pudo cargar el script de libreria" && exit 1
 fi
 
 # ------------------ Variables ----------------- #
@@ -74,22 +74,22 @@ done
 
 if (( ${#missing[@]} > 0 )); then
   for m in "${missing[@]}"; do
-    error "${m} is required"
+    error "${m} es requerido"
   done
   exit 1
 fi
 
 
-# --------- Main installation functions -------- #
+# --------- Funciones principales de instalacion #
 
 install_composer() {
-  output "Installing composer.."
+  output "Instalando composer.."
   curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-  success "Composer installed!"
+  success "Composer instalado."
 }
 
 ptdl_dl() {
-  output "Downloading pterodactyl panel files .. "
+  output "Descargando archivos del panel de Pterodactyl.."
   mkdir -p /var/www/pterodactyl
   cd /var/www/pterodactyl || exit
 
@@ -99,19 +99,19 @@ ptdl_dl() {
 
   cp .env.example .env
 
-  success "Downloaded pterodactyl panel files!"
+  success "Archivos del panel descargados."
 }
 
 install_composer_deps() {
-  output "Installing composer dependencies.."
+  output "Instalando dependencias de composer.."
   [ "$OS" == "rocky" ] || [ "$OS" == "almalinux" ] && export PATH=/usr/local/bin:$PATH
   COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
-  success "Installed composer dependencies!"
+  success "Dependencias de composer instaladas."
 }
 
 # Configure environment
 configure() {
-  output "Configuring environment.."
+  output "Configurando entorno.."
 
   local app_url="http://$FQDN"
   [ "$ASSUME_SSL" == true ] && app_url="https://$FQDN"
@@ -153,12 +153,12 @@ configure() {
     --password="$user_password" \
     --admin=1
 
-  success "Configured environment!"
+  success "Entorno configurado."
 }
 
-# set the correct folder permissions depending on OS and webserver
+# Establece permisos correctos segun SO y servidor web
 set_folder_permissions() {
-  # if os is ubuntu or debian, we do this
+  # si el SO es ubuntu o debian, hacemos esto
   case "$OS" in
   debian | ubuntu)
     chown -R www-data:www-data ./*
@@ -170,18 +170,19 @@ set_folder_permissions() {
 }
 
 insert_cronjob() {
-  output "Installing cronjob.. "
+  output "Instalando cronjob.."
 
-  crontab -l | {
+  local cron_line="* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1"
+  crontab -l 2>/dev/null | grep -vF "$cron_line" | {
     cat
-    output "* * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1"
+    echo "$cron_line"
   } | crontab -
 
-  success "Cronjob installed!"
+  success "Cronjob instalado."
 }
 
 install_pteroq() {
-  output "Installing pteroq service.."
+  output "Instalando servicio pteroq.."
 
   curl -o /etc/systemd/system/pteroq.service "$GITHUB_URL"/configs/pteroq.service
 
@@ -197,10 +198,10 @@ install_pteroq() {
   systemctl enable pteroq.service
   systemctl start pteroq
 
-  success "Installed pteroq!"
+  success "pteroq instalado."
 }
 
-# -------- OS specific install functions ------- #
+# -------- Funciones de instalacion por SO ------ #
 
 enable_services() {
   case "$OS" in
@@ -232,7 +233,7 @@ php_fpm_conf() {
 }
 
 ubuntu_dep() {
-  # Install deps for adding repos
+  # Instalar dependencias para agregar repos
   install_packages "software-properties-common apt-transport-https ca-certificates gnupg"
 
   # Add Ubuntu universe repo
@@ -243,10 +244,10 @@ ubuntu_dep() {
 }
 
 debian_dep() {
-  # Install deps for adding repos
+  # Instalar dependencias para agregar repos
   install_packages "dirmngr ca-certificates apt-transport-https lsb-release"
 
-  # Install PHP 8.3 using sury's repo
+  # Instalar PHP 8.3 usando el repo de sury
   curl -o /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
   echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
 }
@@ -262,9 +263,9 @@ alma_rocky_dep() {
 }
 
 dep_install() {
-  output "Installing dependencies for $OS $OS_VER..."
+  output "Instalando dependencias para $OS $OS_VER..."
 
-  # Update repos before installing
+  # Actualizar repos antes de instalar
   update_repos
 
   [ "$CONFIGURE_FIREWALL" == true ] && install_firewall && firewall_ports
@@ -276,7 +277,7 @@ dep_install() {
 
     update_repos
 
-    # Install dependencies
+    # Instalar dependencias
     install_packages "php8.3 php8.3-{cli,common,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip} \
       mariadb-common mariadb-server mariadb-client \
       nginx \
@@ -290,7 +291,7 @@ dep_install() {
   rocky | almalinux)
     alma_rocky_dep
 
-    # Install dependencies
+    # Instalar dependencias
     install_packages "php php-{common,fpm,cli,json,mysqlnd,mcrypt,gd,mbstring,pdo,zip,bcmath,dom,opcache,posix} \
       mariadb mariadb-server \
       nginx \
@@ -310,31 +311,31 @@ dep_install() {
 
   enable_services
 
-  success "Dependencies installed!"
+  success "Dependencias instaladas."
 }
 
 # --------------- Other functions -------------- #
 
 firewall_ports() {
-  output "Opening ports: 22 (SSH), 80 (HTTP) and 443 (HTTPS)"
+  output "Abriendo puertos: 22 (SSH), 80 (HTTP) y 443 (HTTPS)"
 
   firewall_allow_ports "22 80 443"
 
-  success "Firewall ports opened!"
+  success "Puertos del firewall abiertos."
 }
 
 letsencrypt() {
   FAILED=false
 
-  output "Configuring Let's Encrypt..."
+  output "Configurando Let's Encrypt..."
 
   # Obtain certificate
   certbot --nginx --redirect --no-eff-email --email "$email" -d "$FQDN" || FAILED=true
 
-  # Check if it succeded
+  # Verificar si tuvo exito
   if [ ! -d "/etc/letsencrypt/live/$FQDN/" ] || [ "$FAILED" == true ]; then
-    warning "The process of obtaining a Let's Encrypt certificate failed!"
-    echo -n "* Still assume SSL? (y/N): "
+    warning "El proceso para obtener el certificado de Let's Encrypt fallo."
+    echo -n "* Aun quieres asumir SSL? (y/N): "
     read -r CONFIGURE_SSL
 
     if [[ "$CONFIGURE_SSL" =~ [Yy] ]]; then
@@ -346,14 +347,14 @@ letsencrypt() {
       CONFIGURE_LETSENCRYPT=false
     fi
   else
-    success "The process of obtaining a Let's Encrypt certificate succeeded!"
+    success "Certificado de Let's Encrypt obtenido correctamente."
   fi
 }
 
 # ------ Webserver configuration functions ----- #
 
 configure_nginx() {
-  output "Configuring nginx .."
+  output "Configurando nginx.."
 
   if [ "$ASSUME_SSL" == true ] && [ "$CONFIGURE_LETSENCRYPT" == false ]; then
     DL_FILE="nginx_ssl.conf"
@@ -392,13 +393,13 @@ configure_nginx() {
     systemctl restart nginx
   fi
 
-  success "Nginx configured!"
+  success "Nginx configurado."
 }
 
 # --------------- Main functions --------------- #
 
 perform_install() {
-  output "Starting installation.. this might take a while!"
+  output "Iniciando instalacion.. esto puede tardar!"
   dep_install
   install_composer
   ptdl_dl
@@ -415,6 +416,6 @@ perform_install() {
   return 0
 }
 
-# ------------------- Install ------------------ #
+# ------------------- Instalacion -------------- #
 
 perform_install
